@@ -1,0 +1,90 @@
+<div id="grid"></div>
+<button id="next">Next generation</button>
+
+<script>
+  class Generation{
+    constructor(grid){
+      this.grid = grid;
+      this.size = grid[0].length;
+    }
+    static create(size = 5){
+      let gen = [];
+      for (let r=0; r < size; r++){
+        gen.push([]);
+        for (let c=0; c < size; c++){
+        	gen[r].push(Math.random() > 0.6);
+        }
+      }
+      return new Generation(gen);
+    }
+
+    numLiveNeighbors(row, col){
+      let result = 0;
+      for (let dr=-1; dr < 2; dr++){
+        for (let dc=-1; dc < 2; dc++){
+          if(dr == 0 && dc == 0) continue;
+          if(this.grid[row + dr] && this.grid[row + dr][col + dc])
+          	result += 1;
+        }
+      }
+      return result;
+    }
+    changeCell(bool,row,col){
+      this.grid[row][col] = bool;
+    }
+    update(){
+      let result = this.grid.map( (row, rowNum) => {
+        return row.map( (cell, colNum) => {
+          let currentState = row[colNum];
+          //console.log(this);
+          let numNeighbors = this.numLiveNeighbors(rowNum, colNum);
+          if(numNeighbors > 3 || numNeighbors < 2){
+            return false;
+          } else if (numNeighbors == 3){
+            return true;
+          } else{
+            return currentState;
+          }
+        });
+      });
+      return new Generation(result);
+    }
+  }
+
+  function populateGrid(parent, gen){
+    parent.textContent = "";
+    let table = document.createElement("table");
+    for (let row=0; row < gen.size; row++){
+      let tr = document.createElement("tr");
+      for(let col=0; col < gen.size; col++){
+        let cell = gen.grid[row][col];
+        let td = document.createElement("td");
+        let input = document.createElement("input");
+        input.type = "checkbox";
+        input.checked = cell;
+        input.addEventListener("change", evt => {
+          gen.changeCell(evt.target.checked,row,col);
+        });
+        td.appendChild(input);
+        tr.appendChild(td);
+      }
+      table.append(tr);
+    }
+    parent.appendChild(table);
+  }
+
+
+  let currentGen = Generation.create(20);
+  let grid = document.querySelector("#grid");
+  let button = document.querySelector("#next");
+  populateGrid(grid, currentGen);
+
+  next.addEventListener("click", evt => {
+    evt.preventDefault();
+    let nextGen = currentGen.update();
+    populateGrid(grid, nextGen);
+    currentGen = nextGen;
+  });
+
+
+</script>
