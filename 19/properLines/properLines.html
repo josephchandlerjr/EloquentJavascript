@@ -1,0 +1,63 @@
+<div></div>
+<script>
+  // The old draw tool. Rewrite this.
+  function draw(pos, state, dispatch) {
+    function drawPixel({x, y}, state) {
+      let drawn = {x, y, color: state.color};
+      dispatch({picture: state.picture.draw([drawn])});
+    }
+    drawPixel(pos, state);
+    return drawPixel;
+  }
+
+  function line(pos, state, dispatch) {
+    let lineEq, slope, start, end;
+    function drawLine(newPos){
+      let dx = newPos.x - pos.x;
+      let dy = newPos.y - pos.y;
+      if(dx == 0 && dy == 0) return;
+      if(dx == 0){
+        slope = 2;
+        lineEq = y => pos.x;
+      } else if(dy == 0){
+        slope = 0;
+        lineEq = x => pos.y;
+      } else {
+        lineEq = (x,y) => {
+          slope = (newPos.y - pos.y)/(newPos.x - pos.x);
+          let yInt = slope * -start.x + start.y;
+          if(x)  return slope*x + yInt;
+          return (y -yInt)/slope;
+        };
+      }
+      if (Math.abs(slope) <= 1){
+        start = newPos.x > pos.x ? pos : newPos;
+        end = start == pos ? newPos : pos;
+      } else {
+        start = newPos.y > pos.y ? pos : newPos;
+        end = start == pos ? newPos : pos;
+      }
+
+
+      let drawn = [];
+      if (Math.abs(slope) > 1){
+        for (let y = start.y; y <= end.y; y++){
+          console.log(slope);
+          drawn.push({y, x: Math.floor(lineEq(null,y)), color: state.color});
+        }
+      } else {
+        for (let x = start.x; x <= end.x; x++){
+          drawn.push({x, y: Math.floor(lineEq(x)), color: state.color});
+        }
+      }
+      dispatch({picture: state.picture.draw(drawn)});
+    }
+    drawLine(pos);
+    return drawLine;
+  }
+
+  let dom = startPixelEditor({
+    tools: {draw, line, fill, rectangle, pick}
+  });
+  document.querySelector("div").appendChild(dom);
+</script>
