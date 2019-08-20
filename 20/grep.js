@@ -1,7 +1,3 @@
-//grab directory and get contents of directory
-//for each file in directory, createReadStream
-// read from stream and look for matches
-
 
 const {createReadStream} = require("fs");
 const {stat, readdir} = require("fs").promises;
