@@ -13,6 +13,22 @@ function runServer(){
   console.log("Listening! (port 8000)");
 }
 
+function stream(){
+  createServer((request, response) => {
+    response.writeHead(200, {"Content-Type":"test/html"});
+    request.on("data", chunk => response.write(chunk.toString().toUpperCase()))
+    request.on("end", () => response.end());
+  }).listen(8000);
+
+  request({
+    hostname: "localhost",
+    port: 8000,
+    method: "POST"
+  }, response => {
+    response.on("data", chunk => process.stdout.write(chunk.toString()));
+  }).end("Hello server");
+}
+
 function makeRequest(){
   let requestStream = request({
   hostname: "eloquentjavascript.net",
@@ -28,4 +44,5 @@ let arg = process.argv[2];
 switch(arg){
   case "makeRequest": makeRequest(); break;
   case "runServer": runServer(); break;
+  case "stream": stream();break;
 }
